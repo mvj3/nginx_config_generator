@@ -3,14 +3,15 @@
 
 def error(message) puts(message) || exit end
 def file(file) "#{File.dirname(__FILE__)}/#{file}" end
+def read_from_env env; env.to_s.strip.size.zero? ? nil : env; end
 
 if ARGV.include? '--example'
-  example = file:'config.yml.example'
+  example = file :'config.yml.example'
   error open(example).read 
 end
 
-env_in  = ENV['NGINX_CONFIG_YAML']
-env_out = ENV['NGINX_CONFIG_FILE']
+env_in  = read_from_env ENV['NGINX_CONFIG_YAML']
+env_out = read_from_env ENV['NGINX_CONFIG_FILE']
 
 error "Usage: generate_nginx_config [config file] [out file]" if ARGV.empty? && !env_in
 
@@ -24,7 +25,7 @@ template = if custom_template_index = (ARGV.index('--template') || ARGV.index('-
   ARGV.delete_at(custom_template_index) # and its value
   custom
 else
-  file:'nginx.erb'
+  file :'nginx.erb'
 end
 
 if File.exists?(out_file = env_out || ARGV.shift || 'nginx.conf') && !overwrite

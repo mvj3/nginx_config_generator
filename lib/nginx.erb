@@ -4,7 +4,7 @@
 user  <%= config['user'] || "nginx" %> <%= config['group'] || "nginx" %>;
 
 # number of nginx workers
-worker_processes  2;
+worker_processes  <%= config['worker_processes'] || 2 %>;
 
 # pid of nginx master process
 pid   <%= config['pid_path'] || 'logs/' %>nginx.pid;
@@ -49,10 +49,11 @@ http {
   gzip_http_version 1.0;
   gzip_comp_level 2;
   gzip_proxied any;
-  gzip_types      text/plain text/html text/css application/x-javascript text/xml application/xml 
-                   application/xml+rss text/javascript;
+  gzip_types      text/plain text/html text/css 
+                  application/xml+rss text/xml application/xml 
+                  application/x-javascript text/javascript;
 
-	# this is where you define your mongrel clusters. 
+	# this is where you define your mongrel clusters.
 	# you need one of these blocks for each cluster
 	# and each one needs its own name to refer to it later.
 <% Array(config['sites']).each do |name, site| %>
@@ -67,27 +68,27 @@ http {
   }
 <% end %>
 
-<% %w(sites ssl_sites).each do |site_type| %>
+<% %w[sites ssl_sites].each do |site_type| %>
 	
 <% Array(config[site_type]).each do |name, site| %>
   # the server directive is nginx's virtual host directive.
   server {
-    
+
 <% if site['ssl'] %>
 
 <% if site['listen'] %>
     listen		<%= site['listen'] %>;
-<% else %>    
+<% else %>
     listen		443;
 <% end %>
     ssl on;
-    
+
 	# path to your certificate
 	ssl_certificate <%= site['ssl']['cert'] %>;
-  	
+
 	# path to your ssl key
 	ssl_certificate_key <%= site['ssl']['key'] %>;
-  	
+
 <% else %>
 	
     # port to listen on. Can also be set to an IP:PORT
@@ -95,9 +96,9 @@ http {
 
     # sets the domain[s] that this vhost server requests for
     server_name  <%= site['server_name'] %>;
-    
+
 <% end %>
-    
+
     # doc root
     root <%= (config['root'][ site['root'] || 'default' ] || site['root']) % name %>;
 
@@ -105,7 +106,7 @@ http {
     access_log  logs/<%= name %>.access.log  main;
 
     #Set the max size for file uploads to 50Mb
-    client_max_body_size  50M;
+    client_max_body_size  <%= config['client_max_body_size'] || "50M" %>;
 
     # this rewrites all the requests to the maintenance.html
     # page if it exists in the doc root. This is for capistrano's
@@ -151,7 +152,7 @@ http {
       # needed for HTTPS
       proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
       proxy_set_header Host $http_host;
-      proxy_redirect false;
+      proxy_redirect off;
       proxy_max_temp_file_size 0;
 <% if site['ssl'] %>
       # set X-FORWARDED_PROTO so ssl_requirement plugin works
@@ -195,7 +196,7 @@ http {
     location = /50x.html {
       root   html;
     }
-    
+
 <% Array(site['location'] || site['locations']).each do |path, setting| %>
     location = <%= path %> {
       <%= setting %>
