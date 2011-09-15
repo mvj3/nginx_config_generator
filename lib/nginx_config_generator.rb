@@ -28,7 +28,7 @@ else
   file :'nginx.erb'
 end
 
-if File.exists?(out_file = env_out || ARGV.shift || 'nginx.conf') && !overwrite
+if File.exists?(out_file = env_out || ARGV.shift || File.join(config['config_path'], 'nginx.conf')) && !overwrite
   error "=> #{out_file} already exists, won't overwrite it.  Quitting."
 else
   open(out_file, 'w+').write(ERB.new(File.read(template), nil, '>').result(binding))
