@@ -11,6 +11,9 @@ pid   <%= config['pid_path'] || 'logs/' %>nginx.pid;
 
 # Number of worker connections. 1024 is a good default
 events {
+<% if `uname`.match(/linux/i) %>
+  use epoll;
+<% end %>
 	worker_connections  1024;
 }
 
