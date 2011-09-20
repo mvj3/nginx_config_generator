@@ -1,11 +1,11 @@
 #user and group to run as
 user  <%= config['user'] || "nginx" %> <%= config['group'] || "nginx" %>;
+worker_rlimit_nofile <%= config['worker_rlimit_nofile'] || "65536" %>;
 <% if File.exists?('/proc/cpuinfo') && !(processes_count = File.read('/proc/cpuinfo').select {|line| line.match(/process/i) }.count).zero? %>
 worker_cpu_affinity <%= (0..(processes_count-1)).map {|x| ary = Array.new(processes_count, 0); ary[x] = 1; ary.join }.join(' ') %>;
-worker_rlimit_nofile <%= config['worker_rlimit_nofile'] || "65536" %>;
-
-# number of nginx workers
-worker_processes  <%= ((config['worker_processes'].to_i < processes_count) ? config['worker_processes'] : processes_count) || 2 %>;
+worker_processes  <%= processes_count %>;
+<% else %>
+worker_processes  <%= config['worker_processes'] || 2 %>;
 <% end %>
 
 # pid of nginx master process
