@@ -40,7 +40,7 @@ http {
 	access_log  <%= config['log_path'] || 'logs/' %>access.log  main;
 
 	# main error log
-  error_log  <%= config['log_path'] || 'logs/' %>error.log;
+  error_log  <%= config['log_path'] || 'logs/' %>error.log debug;
 
 	# no sendfile on OSX
 	sendfile        on;
