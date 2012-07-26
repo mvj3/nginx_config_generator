@@ -16,36 +16,36 @@ events {
 <% if `uname`.match(/linux/i) %>
   use epoll;
 <% end %>
-	worker_connections  1024;
+  worker_connections  1024;
 }
 
 # start the http module where we config http access.
 http {
   server_names_hash_bucket_size 128;
 
-	# pull in mime-types. You can break out your config 
-	# into as many include's as you want to make it cleaner
-	include       <%= config['config_path'] || 'conf/' %>mime.types;
+  # pull in mime-types. You can break out your config 
+  # into as many include's as you want to make it cleaner
+  include       <%= config['config_path'] || 'conf/' %>mime.types;
 
-	# set a default type for the rare situation that
-	# nothing matches from the mimie-type include
-	default_type  application/octet-stream;
+  # set a default type for the rare situation that
+  # nothing matches from the mimie-type include
+  default_type  application/octet-stream;
 
-	# configure log format
-	log_format  main  '$remote_addr - $remote_user [$time_local] $status '
-                		'"$request" $body_bytes_sent "$http_referer" '
-                		'"$http_user_agent" "http_x_forwarded_for"';
+  # configure log format
+  log_format  main  '$remote_addr - $remote_user [$time_local] "$request" '
+                    '$status $body_bytes_sent "$http_referer" '
+                    '"$http_user_agent" "$http_x_forwarded_for" ---- $host';
 
-	# main access log
-	access_log  <%= config['log_path'] || 'logs/' %>access.log  main;
+  # main access log
+  access_log  <%= config['log_path'] || 'logs/' %>access.log  main;
 
-	# main error log
+  # main error log
   error_log  <%= config['log_path'] || 'logs/' %>error.log debug;
 
-	# no sendfile on OSX
-	sendfile        on;
+  # no sendfile on OSX
+  sendfile        on;
 
-	# These are good default values.
+  # These are good default values.
   tcp_nopush        on;
   tcp_nodelay       off;
   # output compression saves bandwidth 
@@ -57,9 +57,9 @@ http {
                   application/xml+rss text/xml application/xml
                   application/x-javascript text/javascript application/json;
 
-	# this is where you define your mongrel clusters.
-	# you need one of these blocks for each cluster
-	# and each one needs its own name to refer to it later.
+  # this is where you define your mongrel clusters.
+  # you need one of these blocks for each cluster
+  # and each one needs its own name to refer to it later.
 <% Array(config['sites']).each do |name, site| %>
   <% next unless site['upstream'] %>
   upstream <%= name %> {
@@ -86,7 +86,7 @@ http {
 <% end %>
 
 <% %w[sites ssl_sites].each do |site_type| %>
-	
+  
 <% Array(config[site_type]).each do |name, site| %>
   # the server directive is nginx's virtual host directive.
   server {
@@ -100,14 +100,14 @@ http {
 <% end %>
     ssl on;
 
-	# path to your certificate
-	ssl_certificate <%= site['ssl']['cert'] %>;
+  # path to your certificate
+  ssl_certificate <%= site['ssl']['cert'] %>;
 
-	# path to your ssl key
-	ssl_certificate_key <%= site['ssl']['key'] %>;
+  # path to your ssl key
+  ssl_certificate_key <%= site['ssl']['key'] %>;
 
 <% else %>
-	
+  
     # port to listen on. Can also be set to an IP:PORT
     listen       80;
 
